@@ -45,7 +45,7 @@ unsigned long current_time = 0; //para ir guardando el tiempo actual
 const unsigned long reading_period = 2000; //periodo de lectura de los sensores
 unsigned long last_reading_time = 0; // ultimo tiempo de lectura
 
-const unsigned long sending_period = 20000;
+const unsigned long sending_period = 30000;
 unsigned long last_sending_time = 0;
 
 
