@@ -1,2 +1,2 @@
 # soil_hunidity
-This is a proyecto in which temperature and humidity of the soil is reading by sensor and then sent to a website. In that way, farmers can make watering more efficient by analyzing these parameters   
+This is a proyect to make soil watering in farms more efficient by reading temperature and humidity of the soil using sensors and a ESP32 microcontroller.
