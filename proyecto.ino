@@ -4,8 +4,8 @@
 #include <HTTPClient.h>
 #include <LiquidCrystal_I2C.h>
 #define uS_TO_S_FACTOR 1000000  /* Conversion factor for micro seconds to seconds */
-//#define TIME_TO_SLEEP  30        /* Time ESP32 will go to sleep (in seconds) */
-//RTC_DATA_ATTR int bootCount = 0; //conteo de veces que despierta
+#define TIME_TO_SLEEP  30        /* Time ESP32 will go to sleep (in seconds) */
+RTC_DATA_ATTR int bootCount = 0; //conteo de veces que despierta
 
 #define TINY_GSM_MODEM_SIM800 // MODULO GSM UTILIZADO (SIM800L)
 #define TINY_GSM_RX_BUFFER   1024 //TAMAÑO DEL BUFFER
@@ -287,7 +287,7 @@ void sending_data_wifi(){
 {
   esp_sleep_wakeup_cause_t wakeup_reason;
 
- // wakeup_reason = esp_sleep_get_wakeup_cause();
+ wakeup_reason = esp_sleep_get_wakeup_cause();
 
   switch(wakeup_reason)
   {
@@ -326,9 +326,9 @@ void setup() {
 //  Serial.println("Boot number: " + String(bootCount));
   delay(1000);
   //print_wakeup_reason();
-  //esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-  //Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) +
-  //" Seconds");
+  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+  Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) +
+  " Seconds");
 }
 
 void loop() {
