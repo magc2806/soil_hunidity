@@ -133,7 +133,7 @@ void setup_gsm()
       Serial.println(apn);
       if (!modemGSM.isNetworkConnected()){
         Serial.print("Network connection failed");
-        modemGSM.restart();
+        modemGSM.restart(); //aqui reseteo por no poder inciar
         return;      
       }
       else
