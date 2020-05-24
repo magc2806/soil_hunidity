@@ -105,7 +105,8 @@ void setup_wifi(){
   }
 
 
-boolean setup_gsm(){
+void setup_gsm()
+{
   Serial.println("Initializing GSM module...");
   SerialGSM.begin(BAUD_RATE, SERIAL_8N1, RX_PIN, TX_PIN, false);
   delay(3000);
@@ -113,34 +114,36 @@ boolean setup_gsm(){
   delay(100);
   if (!modemGSM.init()) {
   // if (!modem.restart()) {
-    Serial.println(F(" Restarting"));    
+    Serial.println(F(" Restarting"));
+    modemGSM.restart();   
     delay(100);
     return false;
   }
-
-  if (!modemGSM.gprsConnect(apn, gprsUser, gprsPass)) {
+  else
+  {
+    Serial.println("GSM initilized");   
+    if (!modemGSM.gprsConnect(apn, gprsUser, gprsPass)) {
     Serial.println("Connection to APN failed");
-    return false;
+    modemGSM.restart();
+    return;
     }
-    else{
+    else
+    {
       Serial.print("Connected to");
       Serial.println(apn);
-      if (modemGSM.isNetworkConnected()){
-
-      Serial.print("Connected to network");
-      digitalWrite(led, HIGH); //enciendo el LED una vez que el wifi está conectado
-      return true;    
-      
-      }
-      else {
+      if (!modemGSM.isNetworkConnected()){
         Serial.print("Network connection failed");
-        return false;
-        
-        }
+        modemGSM.restart();
+        return;      
+      }
+      else
+      {
+        Serial.print("Connected to network"); 
+       }
     } 
-
-     
+  
   }
+}
 
 void show_to_lcd(int opc){
       lcd.clear();
@@ -207,18 +210,29 @@ void sending_data_wifi(){
    }  
 }
 
-  void sending_data_gsm(){
+int sending_data_gsm()
+{
     Serial.print("Connecting to APN ");
     Serial.println(apn);
 
-  if (modemGSM.gprsConnect(apn, gprsUser, gprsPass)) 
+  if (!modemGSM.gprsConnect(apn, gprsUser, gprsPass)) 
   { //Check if APN is connected
+    Serial.println("Error connecting to APN");
+    return 0;
+  }
+    
+   else
+   {
+      Serial.print("Connected to APN ");
+      Serial.println(apn);
+      if (!modemGSM.isNetworkConnected())
+      {        
+        Serial.println("Network Connection failed");//check if network is connected
+        return 0;                
+      }
 
-    Serial.print("Connected to APN ");
-    Serial.println(apn);
-
-    if (modemGSM.isNetworkConnected())
-    { //check if network is connected
+      else
+      {
           Serial.println("Connected to network");
           Serial.print("Connecting to ");
           Serial.print(website_URL);
@@ -251,15 +265,17 @@ void sending_data_wifi(){
           jsonObj.printTo(Serial);
           String sendToServer;
           jsonObj.prettyPrintTo(sendToServer);
-          SerialGSM.println("AT+HTTPDATA=" + String(sendToServer.length()) + ",100000"); //Aqui le digo el tamaño de lo que se enviara
+
+          SerialGSM.println("AT+HTTPDATA=" + String(sendToServer.length()) + ",100000");
           ShowSerialData();
-          Serial.println("####################");
-          //Serial.println(sendToServer);
-          
+
+          Serial.println("#####");
+          Serial.println(sendToServer);  
+
           SerialGSM.println(sendToServer); //Aqui colo el json para ser enviado
           ShowSerialData();
           delay(2000);
-          
+
           SerialGSM.println("AT+HTTPACTION=1"); //Aqui envio el Json
           delay(2000);
           ShowSerialData();
@@ -271,21 +287,10 @@ void sending_data_wifi(){
            SerialGSM.println("AT+HTTPTERM"); //Aqui termino la comunidacion HTTP
            delay(1000);
            ShowSerialData();        
+        
+        }      
     }
-    else
-    {
-
-      Serial.println("Network Connection failed");
-    }
-  }
-
-    else 
-    {
-      Serial.println("Error connecting to APN");
-     }
-
-    
-    }
+}
 
  void print_wakeup_reason()
 {
