@@ -117,7 +117,7 @@ void setup_gsm()
     Serial.println(F(" Restarting"));
     modemGSM.restart();   
     delay(100);
-    return false;
+    return;
   }
   else
   {
