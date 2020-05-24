@@ -45,7 +45,7 @@ unsigned long current_time = 0; //para ir guardando el tiempo actual
 const unsigned long reading_period = 2000; //periodo de lectura de los sensores
 unsigned long last_reading_time = 0; // ultimo tiempo de lectura
 
-const unsigned long sending_period = 10000;
+const unsigned long sending_period = 30000;
 unsigned long last_sending_time = 0;
 
 
@@ -105,7 +105,7 @@ void setup_wifi(){
   }
 
 
-void setup_gsm(){
+boolean setup_gsm(){
   Serial.println("Initializing GSM module...");
   SerialGSM.begin(BAUD_RATE, SERIAL_8N1, RX_PIN, TX_PIN, false);
   delay(3000);
@@ -115,27 +115,31 @@ void setup_gsm(){
   // if (!modem.restart()) {
     Serial.println(F(" Restarting"));    
     delay(100);
-    return;
+    return false;
   }
 
   if (!modemGSM.gprsConnect(apn, gprsUser, gprsPass)) {
     Serial.println("Connection to APN failed");
+    return false;
     }
     else{
       Serial.print("Connected to");
       Serial.println(apn);
-    } 
-
-     if (modemGSM.isNetworkConnected()){
+      if (modemGSM.isNetworkConnected()){
 
       Serial.print("Connected to network");
-      digitalWrite(led, HIGH); //enciendo el LED una vez que el wifi está conectado    
+      digitalWrite(led, HIGH); //enciendo el LED una vez que el wifi está conectado
+      return true;    
       
       }
       else {
         Serial.print("Network connection failed");
+        return false;
         
         }
+    } 
+
+     
   }
 
 void show_to_lcd(int opc){
@@ -326,8 +330,8 @@ void setup() {
 //  Serial.println("Boot number: " + String(bootCount));
   delay(1000);
   //print_wakeup_reason();
-  esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
-  Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) +
+  //esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
+  //Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) +
   " Seconds");
 }
 
