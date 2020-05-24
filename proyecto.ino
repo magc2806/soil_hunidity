@@ -115,6 +115,9 @@ void setup_gsm()
   if (!modemGSM.init()) {
   // if (!modem.restart()) {
     Serial.println(F(" Restarting"));
+    lcd.clear();
+    lcd.print("Err init");
+    delay(3000);
     modemGSM.restart();   
     delay(100);
     return;
@@ -124,26 +127,39 @@ void setup_gsm()
     Serial.println("GSM initilized");   
     if (!modemGSM.gprsConnect(apn, gprsUser, gprsPass)) {
     Serial.println("Connection to APN failed");
+    lcd.clear();
+    lcd.print("Err APN");
+    delay(3000);
     modemGSM.restart();
     return;
     }
     else
-    {
+    { 
       Serial.print("Connected to");
       Serial.println(apn);
+      lcd.clear();
+      lcd.print("APN listo");
+      delay(3000);
       if (!modemGSM.isNetworkConnected()){
         Serial.print("Network connection failed");
-        modemGSM.restart(); //aqui reseteo por no poder inciar
+        lcd.clear();
+        lcd.print("Err Red");
+        delay(3000);
+        modemGSM.restart();
         return;      
       }
       else
       {
         Serial.print("Connected to network"); 
+        lcd.clear();
+        lcd.print("Red lista");
+        delay(3000);
        }
     } 
   
   }
 }
+
 
 void show_to_lcd(int opc){
       lcd.clear();
@@ -210,25 +226,16 @@ void sending_data_wifi(){
    }  
 }
 
-int sending_data_gsm()
-{
-    Serial.print("Connecting to APN ");
-    Serial.println(apn);
+void sending_data_gsm()
+{    
 
-  if (!modemGSM.gprsConnect(apn, gprsUser, gprsPass)) 
-  { //Check if APN is connected
-    Serial.println("Error connecting to APN");
-    return 0;
-  }
-    
-   else
-   {
-      Serial.print("Connected to APN ");
-      Serial.println(apn);
+      Serial.println("Checking network ");
+      
       if (!modemGSM.isNetworkConnected())
       {        
         Serial.println("Network Connection failed");//check if network is connected
-        return 0;                
+        modemGSM.restart();
+        return;                
       }
 
       else
@@ -240,18 +247,18 @@ int sending_data_gsm()
           Serial.println("Sending http init");
           SerialGSM.println("AT+HTTPINIT");          
           ShowSerialData();
-          delay(1000);
+          delay(3000);
           Serial.println("Sending CID");
-          delay(1000);
+          delay(3000);
           SerialGSM.println("AT+HTTPPARA=\"CID\",1");
           ShowSerialData();
-          delay(1000);
+          delay(3000);
           SerialGSM.println("AT+HTTPPARA=\"URL\",\"http://evening-headland-87613.herokuapp.com/api/v1/measurements\"");
           ShowSerialData();           
-          delay(1000);
+          delay(3000);
           SerialGSM.println("AT+HTTPPARA=\"CONTENT\",\"application/json\"");
           ShowSerialData();
-          delay(1000);
+          delay(3000);
                    
           StaticJsonBuffer<400> jsonBuffer;
           JsonObject& jsonObj = jsonBuffer.createObject();
@@ -259,7 +266,7 @@ int sending_data_gsm()
 
           jsonObj["measurement_point_id"] = String(measurement_point_id);
           jsonObj["token"] = String(TOKEN);
-          jsonObj["moisture"] = String(humidity_value);
+          jsonObj["moisture"] = String("300");
           jsonObj["temperature"] = "250";
           jsonObj["date"] = "2020-02-20 19:00:00";
           jsonObj.printTo(Serial);
@@ -286,10 +293,13 @@ int sending_data_gsm()
 
            SerialGSM.println("AT+HTTPTERM"); //Aqui termino la comunidacion HTTP
            delay(1000);
-           ShowSerialData();        
+           ShowSerialData();
+           digitalWrite(led,LOW);
+           delay(500);
+           digitalWrite(led,HIGH);        
         
         }      
-    }
+    
 }
 
  void print_wakeup_reason()
@@ -342,13 +352,7 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  //lcd.print("loop");
-   
-
-  while(!Serial){
-    //Me quedo aquí mientras no haya comunicación serial 
-         
-    }
+  //lcd.print("loop");  
 
     //Me quedo aqui hasta que seleccione un metodo de envio
     while(opc == 0)
@@ -362,7 +366,7 @@ void loop() {
           lcd.clear();
           lcd.print("Configurando wifi");
           delay(10);
-          Serial.println("Confiruando wifi");
+          Serial.println("Configurando wifi");
           setup_wifi();
           delay(10);
           lcd.clear();
