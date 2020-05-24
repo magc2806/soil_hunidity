@@ -266,7 +266,7 @@ void sending_data_gsm()
 
           jsonObj["measurement_point_id"] = String(measurement_point_id);
           jsonObj["token"] = String(TOKEN);
-          jsonObj["moisture"] = String("300");
+          jsonObj["moisture"] = String(humidity_value);
           jsonObj["temperature"] = "250";
           jsonObj["date"] = "2020-02-20 19:00:00";
           jsonObj.printTo(Serial);
